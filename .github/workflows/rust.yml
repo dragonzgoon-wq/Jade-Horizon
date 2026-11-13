@@ -1,0 +1,37 @@
+name: Build Jade Horizon Mod
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-linux-android
+
+      - name: Install cargo-ndk
+        run: cargo install cargo-ndk
+
+      - name: Setup Android NDK
+        uses: nttld/setup-ndk@v1
+        with:
+          ndk-version: r25b
+          add-to-path: true
+
+      - name: Build Native Mod with cargo-ndk
+        run: |
+          cargo ndk --target aarch64-linux-android --platform 21 -- build --release
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: jade-hnmod
+          path: |
+            target/aarch64-linux-android/release/*.hnmod
+            target/aarch64-linux-android/release/*.so
